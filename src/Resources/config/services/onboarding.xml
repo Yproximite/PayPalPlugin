@@ -18,6 +18,7 @@
             <argument type="service" id="sylius.http_client" />
             <argument type="service" id="Sylius\PayPalPlugin\Registrar\SellerWebhookRegistrarInterface" />
             <argument>%sylius.pay_pal.facilitator_url%</argument>
+            <argument type="service" id="monolog.logger.paypal" />
         </service>
     </services>
 </container>
