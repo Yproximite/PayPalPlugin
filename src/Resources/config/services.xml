@@ -234,6 +234,7 @@
             <argument>%sylius.pay_pal.facilitator_url%</argument>
             <argument type="service" id="sylius.manager.payment_method" />
             <argument type="service" id="Sylius\PayPalPlugin\Registrar\SellerWebhookRegistrarInterface" />
+            <argument type="service" id="monolog.logger.paypal" />
         </service>
 
         <service

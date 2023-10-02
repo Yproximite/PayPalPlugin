@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sylius\PayPalPlugin\Onboarding\Processor;
 
 use GuzzleHttp\ClientInterface;
+use Psr\Log\LoggerInterface;
 use Sylius\Component\Core\Model\PaymentMethodInterface;
 use Sylius\PayPalPlugin\Exception\PayPalPluginException;
 use Sylius\PayPalPlugin\Exception\PayPalWebhookAlreadyRegisteredException;
@@ -21,14 +22,18 @@ final class BasicOnboardingProcessor implements OnboardingProcessorInterface
 
     private string $url;
 
+    private LoggerInterface $logger;
+
     public function __construct(
         ClientInterface $httpClient,
         SellerWebhookRegistrarInterface $sellerWebhookRegistrar,
-        string $url
+        string $url,
+        LoggerInterface $logger,
     ) {
         $this->httpClient = $httpClient;
         $this->sellerWebhookRegistrar = $sellerWebhookRegistrar;
         $this->url = $url;
+        $this->logger = $logger;
     }
 
     public function process(
@@ -70,6 +75,7 @@ final class BasicOnboardingProcessor implements OnboardingProcessorInterface
         ]);
 
         $permissionsGranted = $request->query->get('permissionsGranted') === null ? true : (bool) $request->query->get('permissionsGranted');
+        $this->logger->info('[paypal] BasicOnboardingProcessor - permissions', ['query' => $request->query->all(), 'granted' => $permissionsGranted]);
         if (!$permissionsGranted) {
             $paymentMethod->setEnabled(false);
         }
@@ -77,8 +83,10 @@ final class BasicOnboardingProcessor implements OnboardingProcessorInterface
         try {
             $this->sellerWebhookRegistrar->register($paymentMethod);
         } catch (PayPalWebhookUrlNotValidException $exception) {
+            $this->logger->info('[paypal] BasicOnboardingProcessor - not valid');
             $paymentMethod->setEnabled(false);
         } catch (PayPalWebhookAlreadyRegisteredException $exception) {
+            $this->logger->info('[paypal] BasicOnboardingProcessor - already exists');
             $paymentMethod->setEnabled(true);
         }
 

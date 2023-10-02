@@ -88,6 +88,7 @@
         >
             <argument type="service" id="sylius.http_client" />
             <argument>%sylius.pay_pal.api_base_url%</argument>
+            <argument type="service" id="monolog.logger.paypal" />
         </service>
 
         <service
