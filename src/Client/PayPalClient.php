@@ -118,6 +118,7 @@ final class PayPalClient implements PayPalClientInterface
         $fullUrl = $this->baseUrl . $url;
 
         try {
+            $this->logger->info('[paypal] Send request.', ['method' => $method, 'fullUrl' => $fullUrl, 'options' => $options]);
             $response = $this->doRequest($method, $fullUrl, $options);
             if ($this->loggingLevelIncreased) {
                 $this->logger->debug(sprintf('%s request to "%s" called successfully', $method, $fullUrl));
@@ -129,6 +130,7 @@ final class PayPalClient implements PayPalClientInterface
 
         $content = (array) json_decode($response->getBody()->getContents(), true);
 
+        $this->logger->info('[paypal] Response.', ['statusCode' => $response->getStatusCode(), 'content' => $content]);
         if (
             (!in_array($response->getStatusCode(), [200, 204])) &&
             isset($content['debug_id'])
