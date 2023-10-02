@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sylius\PayPalPlugin\Api;
 
 use GuzzleHttp\ClientInterface;
+use Psr\Log\LoggerInterface;
 
 final class WebhookApi implements WebhookApiInterface
 {
@@ -12,14 +13,18 @@ final class WebhookApi implements WebhookApiInterface
 
     private string $baseUrl;
 
-    public function __construct(ClientInterface $client, string $baseUrl)
+    private LoggerInterface $logger;
+
+    public function __construct(ClientInterface $client, string $baseUrl, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->baseUrl = $baseUrl;
+        $this->logger = $logger;
     }
 
     public function register(string $token, string $webhookUrl): array
     {
+        $this->logger->info('[paypal] WebhookApi', ['url' => $webhookUrl, 'baseUrl' => $this->baseUrl]);
         $response = $this->client->request('POST', $this->baseUrl . 'v1/notifications/webhooks', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -34,6 +39,9 @@ final class WebhookApi implements WebhookApiInterface
             ],
         ]);
 
-        return (array) json_decode($response->getBody()->getContents(), true);
+        $result = (array) json_decode($response->getBody()->getContents(), true);
+        $this->logger->info('[paypal] WebhookApi result', ['content' => $result]);
+
+        return $result;
     }
 }

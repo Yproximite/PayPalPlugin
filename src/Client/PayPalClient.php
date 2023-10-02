@@ -147,6 +147,7 @@ final class PayPalClient implements PayPalClientInterface
     private function doRequest(string $method, string $fullUrl, array $options): ResponseInterface
     {
         try {
+            $this->logger->info('[paypal] DoRequest', ['method' => $method, 'fullUrl' => $fullUrl, 'options' => $options]);
             $response = $this->client->request($method, $fullUrl, $options);
         } catch (ConnectException $exception) {
             --$this->requestTrialsLimit;
@@ -156,6 +157,7 @@ final class PayPalClient implements PayPalClientInterface
 
             return $this->doRequest($method, $fullUrl, $options);
         } catch (RequestException $exception) {
+            $this->logger->error('[paypal] DoRequest', ['method' => $method, 'fullUrl' => $fullUrl, 'options' => $options, 'exception' => $exception]);
             /** @var ResponseInterface $response */
             $response = $exception->getResponse();
         }
